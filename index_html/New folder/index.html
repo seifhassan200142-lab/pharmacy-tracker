@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedTrack — Medication Expiry Manager</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       HEADER
+  ═══════════════════════════════════════════ -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⊕</span>
+        <span class="logo-text">MedTrack</span>
+      </div>
+      <p class="header-sub">Pharmacy Expiry Manager</p>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════
+       ALERT BANNER (shown when expired/expiring soon meds exist)
+  ═══════════════════════════════════════════ -->
+  <div id="alert-banner" class="alert-banner hidden" role="alert" aria-live="polite">
+    <span class="alert-icon">⚠</span>
+    <span id="alert-text"></span>
+    <button class="alert-close" onclick="dismissBanner()" aria-label="Dismiss">✕</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════════ -->
+  <main class="main-container">
+
+    <!-- ADD MEDICATION CARD -->
+    <section class="add-card" aria-label="Add Medication">
+      <div class="card-header">
+        <h2 class="card-title">Add Medication</h2>
+        <span class="card-pill">New Entry</span>
+      </div>
+
+      <div class="form-row">
+        <!-- Medication Name -->
+        <div class="field-group">
+          <label for="med-name" class="field-label">Medication Name</label>
+          <input
+            type="text"
+            id="med-name"
+            class="field-input"
+            placeholder="e.g. Amoxicillin 500mg"
+            autocomplete="off"
+            maxlength="80"
+          />
+          <span class="field-error" id="name-error"></span>
+        </div>
+
+        <!-- Expiration Date -->
+        <div class="field-group">
+          <label for="exp-date" class="field-label">Expiration Date</label>
+          <input
+            type="date"
+            id="exp-date"
+            class="field-input"
+          />
+          <span class="field-error" id="date-error"></span>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="field-group field-btn">
+          <button id="add-btn" class="btn-primary" onclick="addMedication()">
+            <span class="btn-icon">+</span> Add Medication
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS ROW -->
+    <section class="stats-row" aria-label="Summary statistics">
+      <div class="stat-card stat-total">
+        <span class="stat-num" id="stat-total">0</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat-card stat-valid">
+        <span class="stat-num" id="stat-valid">0</span>
+        <span class="stat-label">Valid</span>
+      </div>
+      <div class="stat-card stat-soon">
+        <span class="stat-num" id="stat-soon">0</span>
+        <span class="stat-label">Expiring Soon</span>
+      </div>
+      <div class="stat-card stat-expired">
+        <span class="stat-num" id="stat-expired">0</span>
+        <span class="stat-label">Expired</span>
+      </div>
+    </section>
+
+    <!-- MEDICATIONS LIST -->
+    <section class="list-section" aria-label="Medications list">
+      <div class="list-header">
+        <h2 class="card-title">Medications</h2>
+        <!-- Search / Filter -->
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            id="search-input"
+            class="search-input"
+            placeholder="Search medications…"
+            oninput="renderList()"
+            aria-label="Search medications"
+          />
+        </div>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="filter-tabs" role="tablist" aria-label="Filter by status">
+        <button class="tab active" data-filter="all"    onclick="setFilter(this)" role="tab">All</button>
+        <button class="tab"        data-filter="valid"  onclick="setFilter(this)" role="tab">Valid</button>
+        <button class="tab"        data-filter="soon"   onclick="setFilter(this)" role="tab">Expiring Soon</button>
+        <button class="tab"        data-filter="expired"onclick="setFilter(this)" role="tab">Expired</button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table class="med-table" aria-label="Medication list">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Medication Name</th>
+              <th>Expiration Date</th>
+              <th>Days Left</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="med-tbody">
+            <!-- Rows injected by JS -->
+          </tbody>
+        </table>
+
+        <!-- Empty state -->
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-icon">💊</div>
+          <p class="empty-title">No medications found</p>
+          <p class="empty-sub">Add your first medication using the form above.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <p>MedTrack &copy; <span id="year"></span> — All data stored locally on your device.</p>
+  </footer>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

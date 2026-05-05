@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام متابعة صلاحية الأدوية</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 20px; text-align: center; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; }
+        input { padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 5px; width: 80%; }
+        button { padding: 10px 20px; background-color: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #219150; }
+        table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background-color: #f8f9fa; }
+        .expired { background-color: #ffcccc; color: #c0392b; font-weight: bold; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .delete-btn { background-color: #e74c3c; padding: 5px 10px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>مدير صلاحية الأدوية 💊</h2>
+    
+    <input type="text" id="medName" placeholder="اسم الدواء">
+    <input type="date" id="expiryDate">
+    <button onclick="addMedication()">إضافة الدواء</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>الدواء</th>
+                <th>تاريخ الانتهاء</th>
+                <th>إجراء</th>
+            </tr>
+        </thead>
+        <tbody id="medList"></tbody>
+    </table>
+</div>
+
+<script>
+    // تحميل البيانات عند فتح الصفحة
+    document.addEventListener('DOMContentLoaded', displayMeds);
+
+    function addMedication() {
+        const name = document.getElementById('medName').value;
+        const date = document.getElementById('expiryDate').value;
+
+        if (!name || !date) {
+            alert("يرجى إدخال اسم الدواء والتاريخ");
+            return;
+        }
+
+        const medication = { id: Date.now(), name, date };
+        let meds = JSON.parse(localStorage.getItem('meds')) || [];
+        meds.push(medication);
+        localStorage.setItem('meds', JSON.stringify(meds));
+
+        document.getElementById('medName').value = '';
+        document.getElementById('expiryDate').value = '';
+        displayMeds();
+    }
+
+    function displayMeds() {
+        const list = document.getElementById('medList');
+        list.innerHTML = '';
+        const meds = JSON.parse(localStorage.getItem('meds')) || [];
+        const today = new Date();
+
+        meds.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(med => {
+            const expDate = new Date(med.date);
+            const timeDiff = expDate - today;
+            const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+            let rowClass = '';
+            if (daysDiff < 0) rowClass = 'expired'; // انتهى فعلياً
+            else if (daysDiff <= 30) rowClass = 'warning'; // ينتهي خلال شهر
+
+            const row = `<tr class="${rowClass}">
+                <td>${med.name}</td>
+                <td>${med.date}</td>
+                <td><button class="delete-btn" onclick="deleteMed(${med.id})">حذف</button></td>
+            </tr>`;
+            list.innerHTML += row;
+        });
+    }
+
+    function deleteMed(id) {
+        let meds = JSON.parse(localStorage.getItem('meds'));
+        meds = meds.filter(med => med.id !== id);
+        localStorage.setItem('meds', JSON.stringify(meds));
+        displayMeds();
+    }
+</script>
+
+</body>
+</html>
